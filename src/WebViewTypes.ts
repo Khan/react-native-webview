@@ -7,6 +7,7 @@ import {
   NativeMethodsMixin,
   Constructor,
   UIManagerStatic,
+  NativeScrollEvent,
 } from 'react-native';
 
 export interface WebViewCommands {
@@ -211,6 +212,7 @@ export interface CommonNativeWebViewProps extends ViewProps {
   injectedJavaScript?: string;
   mediaPlaybackRequiresUserAction?: boolean;
   messagingEnabled: boolean;
+  onScroll: (event: NativeScrollEvent) => void;
   onLoadingError: (event: WebViewErrorEvent) => void;
   onLoadingFinish: (event: WebViewNavigationEvent) => void;
   onLoadingProgress: (event: WebViewProgressEvent) => void;
@@ -277,6 +279,8 @@ export interface IOSWebViewProps extends WebViewSharedProps {
    * @platform ios
    */
   bounces?: boolean;
+
+  onScroll: () => void;
 
   /**
    * A floating-point number that determines how quickly the scroll view
@@ -411,7 +415,7 @@ export interface AndroidWebViewProps extends WebViewSharedProps {
    */
   overScrollMode?: OverScrollModeType;
 
-  onScroll: () => void,
+  onScroll: () => void;
 
   /**
    * Sets whether Geolocation is enabled. The default is false.

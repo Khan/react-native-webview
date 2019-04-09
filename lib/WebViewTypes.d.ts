@@ -1,5 +1,5 @@
 import { ReactElement, Component } from 'react';
-import { NativeSyntheticEvent, ViewProps, NativeMethodsMixin, Constructor, UIManagerStatic } from 'react-native';
+import { NativeSyntheticEvent, ViewProps, NativeMethodsMixin, Constructor, UIManagerStatic, NativeScrollEvent } from 'react-native';
 export interface WebViewCommands {
     goForward: Function;
     goBack: Function;
@@ -144,6 +144,7 @@ export interface CommonNativeWebViewProps extends ViewProps {
     injectedJavaScript?: string;
     mediaPlaybackRequiresUserAction?: boolean;
     messagingEnabled: boolean;
+    onScroll: (event: NativeScrollEvent) => void;
     onLoadingError: (event: WebViewErrorEvent) => void;
     onLoadingFinish: (event: WebViewNavigationEvent) => void;
     onLoadingProgress: (event: WebViewProgressEvent) => void;
@@ -203,6 +204,7 @@ export interface IOSWebViewProps extends WebViewSharedProps {
      * @platform ios
      */
     bounces?: boolean;
+    onScroll: () => void;
     /**
      * A floating-point number that determines how quickly the scroll view
      * decelerates after the user lifts their finger. You may also use the
