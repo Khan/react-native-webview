@@ -411,6 +411,8 @@ export interface AndroidWebViewProps extends WebViewSharedProps {
    */
   overScrollMode?: OverScrollModeType;
 
+  onScroll: () => void,
+
   /**
    * Sets whether Geolocation is enabled. The default is false.
    * @platform android
