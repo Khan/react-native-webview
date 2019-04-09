@@ -66,57 +66,57 @@ repositories {
     )
   }
 
-  if (defaultDir.exists()) {
-    maven {
-      url defaultDir.toString()
-      name androidSourcesName
-    }
+  // if (defaultDir.exists()) {
+  //   maven {
+  //     url defaultDir.toString()
+  //     name androidSourcesName
+  //   }
 
-    logger.quiet(":${project.name}:reactNativeAndroidRoot ${defaultDir.canonicalPath}")
-    found = true
-  } else {
-    def parentDir = rootProject.projectDir
+  //   logger.quiet(":${project.name}:reactNativeAndroidRoot ${defaultDir.canonicalPath}")
+  //   found = true
+  // } else {
+  //   def parentDir = rootProject.projectDir
 
-    1.upto(5, {
-      if (found) return true
-      parentDir = parentDir.parentFile
+  //   1.upto(5, {
+  //     if (found) return true
+  //     parentDir = parentDir.parentFile
 
-      def androidSourcesDir = new File(
-        parentDir,
-        'node_modules/react-native'
-      )
+  //     def androidSourcesDir = new File(
+  //       parentDir,
+  //       'node_modules/react-native'
+  //     )
 
-      def androidPrebuiltBinaryDir = new File(
-        parentDir,
-        'node_modules/react-native/android'
-      )
+  //     def androidPrebuiltBinaryDir = new File(
+  //       parentDir,
+  //       'node_modules/react-native/android'
+  //     )
 
-      if (androidPrebuiltBinaryDir.exists()) {
-        maven {
-          url androidPrebuiltBinaryDir.toString()
-          name androidSourcesName
-        }
+  //     if (androidPrebuiltBinaryDir.exists()) {
+  //       maven {
+  //         url androidPrebuiltBinaryDir.toString()
+  //         name androidSourcesName
+  //       }
 
-        logger.quiet(":${project.name}:reactNativeAndroidRoot ${androidPrebuiltBinaryDir.canonicalPath}")
-        found = true
-      } else if (androidSourcesDir.exists()) {
-        maven {
-          url androidSourcesDir.toString()
-          name androidSourcesName
-        }
+  //       logger.quiet(":${project.name}:reactNativeAndroidRoot ${androidPrebuiltBinaryDir.canonicalPath}")
+  //       found = true
+  //     } else if (androidSourcesDir.exists()) {
+  //       maven {
+  //         url androidSourcesDir.toString()
+  //         name androidSourcesName
+  //       }
 
-        logger.quiet(":${project.name}:reactNativeAndroidRoot ${androidSourcesDir.canonicalPath}")
-        found = true
-      }
-    })
-  }
+  //       logger.quiet(":${project.name}:reactNativeAndroidRoot ${androidSourcesDir.canonicalPath}")
+  //       found = true
+  //     }
+  //   })
+  // }
 
-  if (!found) {
-    throw new GradleException(
-      "${project.name}: unable to locate React Native android sources. " +
-        "Ensure you have you installed React Native as a dependency in your project and try again."
-    )
-  }
+  // if (!found) {
+  //   throw new GradleException(
+  //     "${project.name}: unable to locate React Native android sources. " +
+  //       "Ensure you have you installed React Native as a dependency in your project and try again."
+  //   )
+  // }
 }
 
 def support_version = getExtOrDefault('supportLibVersion')
