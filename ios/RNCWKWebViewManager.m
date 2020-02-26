@@ -14,6 +14,19 @@
 @interface RNCWKWebViewManager () <RNCWKWebViewDelegate>
 @end
 
+@implementation RCTConvert (UIScrollView)
+
+#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 110000 /* __IPHONE_11_0 */
+RCT_ENUM_CONVERTER(UIScrollViewContentInsetAdjustmentBehavior, (@{
+                                                                  @"automatic": @(UIScrollViewContentInsetAdjustmentAutomatic),
+                                                                  @"scrollableAxes": @(UIScrollViewContentInsetAdjustmentScrollableAxes),
+                                                                  @"never": @(UIScrollViewContentInsetAdjustmentNever),
+                                                                  @"always": @(UIScrollViewContentInsetAdjustmentAlways),
+                                                                  }), UIScrollViewContentInsetAdjustmentNever, integerValue)
+#endif
+
+@end
+
 @implementation RNCWKWebViewManager
 {
   NSConditionLock *_shouldStartLoadLock;
@@ -36,6 +49,7 @@ RCT_EXPORT_VIEW_PROPERTY(onLoadingError, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onLoadingProgress, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onShouldStartLoadWithRequest, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(injectedJavaScript, NSString)
+RCT_EXPORT_VIEW_PROPERTY(javaScriptEnabled, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(allowsInlineMediaPlayback, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(mediaPlaybackRequiresUserAction, BOOL)
 #if WEBKIT_IOS_10_APIS_AVAILABLE
@@ -48,8 +62,14 @@ RCT_EXPORT_VIEW_PROPERTY(allowsBackForwardNavigationGestures, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(incognito, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(pagingEnabled, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(userAgent, NSString)
+RCT_EXPORT_VIEW_PROPERTY(applicationNameForUserAgent, NSString)
 RCT_EXPORT_VIEW_PROPERTY(cacheEnabled, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(allowsLinkPreview, BOOL)
+RCT_EXPORT_VIEW_PROPERTY(allowingReadAccessToURL, NSString)
+
+#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 110000 /* __IPHONE_11_0 */
+RCT_EXPORT_VIEW_PROPERTY(contentInsetAdjustmentBehavior, UIScrollViewContentInsetAdjustmentBehavior)
+#endif
 
 /**
  * Expose methods to enable messaging the webview.
@@ -82,6 +102,10 @@ RCT_CUSTOM_VIEW_PROPERTY(scrollEnabled, BOOL, RNCWKWebView) {
   view.scrollEnabled = json == nil ? true : [RCTConvert BOOL: json];
 }
 
+RCT_CUSTOM_VIEW_PROPERTY(sharedCookiesEnabled, BOOL, RNCWKWebView) {
+    view.sharedCookiesEnabled = json == nil ? false : [RCTConvert BOOL: json];
+}
+
 RCT_CUSTOM_VIEW_PROPERTY(decelerationRate, CGFloat, RNCWKWebView) {
   view.decelerationRate = json == nil ? UIScrollViewDecelerationRateNormal : [RCTConvert CGFloat: json];
 }
@@ -96,6 +120,10 @@ RCT_CUSTOM_VIEW_PROPERTY(showsHorizontalScrollIndicator, BOOL, RNCWKWebView) {
 
 RCT_CUSTOM_VIEW_PROPERTY(showsVerticalScrollIndicator, BOOL, RNCWKWebView) {
   view.showsVerticalScrollIndicator = json == nil ? true : [RCTConvert BOOL: json];
+}
+
+RCT_CUSTOM_VIEW_PROPERTY(keyboardDisplayRequiresUserAction, BOOL, RNCWKWebView) {
+  view.keyboardDisplayRequiresUserAction = json == nil ? true : [RCTConvert BOOL: json];
 }
 
 RCT_EXPORT_METHOD(injectJavaScript:(nonnull NSNumber *)reactTag script:(NSString *)script)

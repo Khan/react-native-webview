@@ -18,6 +18,7 @@ export interface WebViewCommands {
   postMessage: Function;
   injectJavaScript: Function;
   loadUrl: Function;
+  requestFocus: Function;
 }
 
 export interface CustomUIManager extends UIManagerStatic {
@@ -92,7 +93,7 @@ export interface WebViewNativeEvent {
   lockIdentifier: number;
 }
 
-export interface WebViewProgressEvent extends WebViewNativeEvent {
+export interface WebViewNativeProgressEvent extends WebViewNativeEvent {
   progress: number;
 }
 
@@ -104,6 +105,7 @@ export interface WebViewNavigation extends WebViewNativeEvent {
     | 'reload'
     | 'formresubmit'
     | 'other';
+  mainDocumentURL?: string;
 }
 
 export type DecelerationRateConstant = 'normal' | 'fast';
@@ -122,6 +124,8 @@ export interface WebViewError extends WebViewNativeEvent {
 }
 
 export type WebViewEvent = NativeSyntheticEvent<WebViewNativeEvent>;
+
+export type WebViewProgressEvent = NativeSyntheticEvent<WebViewNativeProgressEvent>;
 
 export type WebViewNavigationEvent = NativeSyntheticEvent<WebViewNavigation>;
 
@@ -209,10 +213,11 @@ export type OnShouldStartLoadWithRequest = (
 
 export interface CommonNativeWebViewProps extends ViewProps {
   cacheEnabled?: boolean;
+  incognito?: boolean;
   injectedJavaScript?: string;
   mediaPlaybackRequiresUserAction?: boolean;
   messagingEnabled: boolean;
-  onScroll: (event: NativeScrollEvent) => void;
+  onScroll?: (event: NativeScrollEvent) => void;
   onLoadingError: (event: WebViewErrorEvent) => void;
   onLoadingFinish: (event: WebViewNavigationEvent) => void;
   onLoadingProgress: (event: WebViewProgressEvent) => void;
@@ -226,6 +231,10 @@ export interface CommonNativeWebViewProps extends ViewProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   source: any;
   userAgent?: string;
+  /**
+   * Append to the existing user-agent. Overriden if `userAgent` is set.
+   */
+  applicationNameForUserAgent?: string;
 }
 
 export interface AndroidNativeWebViewProps extends CommonNativeWebViewProps {
@@ -245,17 +254,18 @@ export interface AndroidNativeWebViewProps extends CommonNativeWebViewProps {
 }
 
 export interface IOSNativeWebViewProps extends CommonNativeWebViewProps {
+  allowingReadAccessToURL?: string;
   allowsBackForwardNavigationGestures?: boolean;
   allowsInlineMediaPlayback?: boolean;
   allowsLinkPreview?: boolean;
   automaticallyAdjustContentInsets?: boolean;
   bounces?: boolean;
   contentInset?: ContentInsetProp;
+  contentInsetAdjustmentBehavior?: 'automatic'| 'scrollableAxes' | 'never' | 'always';
   dataDetectorTypes?: DataDetectorTypes | ReadonlyArray<DataDetectorTypes>;
   decelerationRate?: number;
   directionalLockEnabled?: boolean;
   hideKeyboardAccessoryView?: boolean;
-  incognito?: boolean;
   pagingEnabled?: boolean;
   scrollEnabled?: boolean;
   useSharedProcessPool?: boolean;
@@ -319,6 +329,13 @@ export interface IOSWebViewProps extends WebViewSharedProps {
   automaticallyAdjustContentInsets?: boolean;
 
   /**
+   * This property specifies how the safe area insets are used to modify the
+   * content area of the scroll view. The default value of this property is
+   * "never". Available on iOS 11 and later.
+   */
+  contentInsetAdjustmentBehavior?: 'automatic'| 'scrollableAxes' | 'never' | 'always'
+
+  /**
    * The amount by which the web view content is inset from the edges of
    * the scroll view. Defaults to {top: 0, left: 0, bottom: 0, right: 0}.
    * @platform ios
@@ -376,6 +393,7 @@ export interface IOSWebViewProps extends WebViewSharedProps {
    * @platform ios
    */
   useSharedProcessPool?: boolean;
+
   /**
    * The custom user agent string.
    */
@@ -392,11 +410,43 @@ export interface IOSWebViewProps extends WebViewSharedProps {
   allowsLinkPreview?: boolean;
 
   /**
+   * Set true if shared cookies from HTTPCookieStorage should used for every load request in the
+   * `RNCWKWebView`. The default value is `false`.
+   * @platform ios
+   */
+  sharedCookiesEnabled?: boolean;
+
+  /**
    * A Boolean value that determines whether scrolling is disabled in a particular direction.
    * The default value is `true`.
    * @platform ios
    */
   directionalLockEnabled?: boolean;
+
+  /**
+   * A Boolean value indicating whether web content can programmatically display the keyboard.
+   *
+   * When this property is set to true, the user must explicitly tap the elements in the
+   * web view to display the keyboard (or other relevant input view) for that element.
+   * When set to false, a focus event on an element causes the input view to be displayed
+   * and associated with that element automatically.
+   *
+   * The default value is `true`.
+   * @platform ios
+   */
+  keyboardDisplayRequiresUserAction?: boolean;
+
+  /**
+   * A String value that indicates which URLs the WebView's file can then
+   * reference in scripts, AJAX requests, and CSS imports. This is only used
+   * in `RNCWKWebView` for WebViews that are loaded with a source.uri set to a
+   * `'file://'` URL.
+   *
+   * If not provided, the default is to only allow read access to the URL
+   * provided in source.uri itself.
+   * @platform ios
+   */
+  allowingReadAccessToURL?: string;
 }
 
 export interface AndroidWebViewProps extends WebViewSharedProps {
@@ -453,13 +503,6 @@ export interface AndroidWebViewProps extends WebViewSharedProps {
   urlPrefixesForDefaultIntent?: ReadonlyArray<string>;
 
   /**
-   * Boolean value to enable JavaScript in the `WebView`. Used on Android only
-   * as JavaScript is enabled by default on iOS. The default value is `true`.
-   * @platform android
-   */
-  javaScriptEnabled?: boolean;
-
-  /**
    * Boolean value to disable Hardware Acceleration in the `WebView`. Used on Android only
    * as Hardware Acceleration is a feature only for Android. The default value is `false`.
    * @platform android
@@ -504,6 +547,11 @@ export interface AndroidWebViewProps extends WebViewSharedProps {
    * @platform android
    */
   mixedContentMode?: 'never' | 'always' | 'compatibility';
+
+  /**
+   * Sets ability to open fullscreen videos on Android devices.
+  */
+  allowsFullscreenVideo?: boolean;
 }
 
 export interface WebViewSharedProps extends ViewProps {
@@ -511,6 +559,13 @@ export interface WebViewSharedProps extends ViewProps {
    * Loads static html or a uri (with optional headers) in the WebView.
    */
   source?: WebViewSource;
+
+  /**
+   * Boolean value to enable JavaScript in the `WebView`. Used on Android only
+   * as JavaScript is enabled by default on iOS. The default value is `true`.
+   * @platform android
+   */
+  javaScriptEnabled?: boolean;
 
   /**
    * Function that returns a view to show if there's an error.
@@ -525,6 +580,11 @@ export interface WebViewSharedProps extends ViewProps {
    * Function that returns a loading indicator.
    */
   renderLoading?: () => ReactElement;
+
+  /**
+   * Function that is invoked when the `WebView` scrolls.
+   */
+  onScroll?: (event: NativeScrollEvent) => void;
 
   /**
    * Function that is invoked when the `WebView` has finished loading.

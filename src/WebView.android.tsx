@@ -48,6 +48,7 @@ class WebView extends React.Component<AndroidWebViewProps, State> {
     javaScriptEnabled: true,
     thirdPartyCookiesEnabled: true,
     scalesPageToFit: true,
+    allowsFullscreenVideo: false,
     allowFileAccess: false,
     saveFormDataDisabled: false,
     cacheEnabled: true,
@@ -101,6 +102,14 @@ class WebView extends React.Component<AndroidWebViewProps, State> {
       this.getWebViewHandle(),
       this.getCommands().stopLoading,
       null,
+    );
+  };
+
+  requestFocus = () => {
+    UIManager.dispatchViewManagerCommand(
+        this.getWebViewHandle(),
+        this.getCommands().requestFocus,
+        null,
     );
   };
 
@@ -243,13 +252,6 @@ class WebView extends React.Component<AndroidWebViewProps, State> {
     }
 
     const webViewStyles = [styles.container, styles.webView, style];
-    if (
-      this.state.viewState === 'LOADING'
-      || this.state.viewState === 'ERROR'
-    ) {
-      // if we're in either LOADING or ERROR states, don't show the webView
-      webViewStyles.push(styles.hidden);
-    }
 
     if (source && 'method' in source) {
       if (source.method === 'POST' && source.headers) {
